@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>浮雲遊子手捏陶學習進度 - 一方天地計畫</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        clay: {
+                            50: '#f7f3ec',
+                            100: '#eee7d8',
+                            200: '#dfceb1',
+                            300: '#ceb084',
+                            400: '#c0955e',
+                            500: '#b47e44',
+                            600: '#a76a3a',
+                            700: '#8b5332',
+                            800: '#73452d',
+                            900: '#5e3a27',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['"Noto Sans TC"', 'sans-serif'],
+                        serif: ['"Noto Serif TC"', 'serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=Noto+Serif+TC:wght@400;600&display=swap');
+
+        body {
+            background-color: #f7f3ec;
+            color: #5e3a27;
+        }
+
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+        }
+
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto;
+            height: 250px;
+        }
+
+        .chart-container-large {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+            height: 280px;
+        }
+
+        @media (min-width: 768px) {
+            .chart-container-large {
+                height: 350px;
+            }
+        }
+
+        .custom-scroll::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .custom-scroll::-webkit-scrollbar-track {
+            background: #eee7d8;
+            border-radius: 4px;
+        }
+
+        .custom-scroll::-webkit-scrollbar-thumb {
+            background: #c0955e;
+            border-radius: 4px;
+        }
+
+        .dimension-card {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .dimension-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(180, 126, 68, 0.2);
+        }
+
+        .dimension-card.active {
+            border-left: 4px solid #b47e44;
+            background-color: #ffffff;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .gallery-container {
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            border-radius: 1.5rem;
+            overflow: hidden;
+            border: 4px solid white;
+            background-color: #dfceb1;
+            min-height: 200px;
+        }
+
+        @media (min-width: 768px) {
+            .gallery-container {
+                border-width: 8px;
+                min-height: 400px;
+            }
+        }
+
+        .tab-btn {
+            transition: all 0.3s ease;
+            border-bottom: 3px solid transparent;
+        }
+
+        .tab-btn.active {
+            color: #b47e44;
+            border-bottom-color: #b47e44;
+            background-color: rgba(180, 126, 68, 0.1);
+        }
+
+        .pottery-table th {
+            background-color: #ceb084;
+            color: #5e3a27;
+            text-align: left;
+            padding: 12px;
+            font-size: 0.875rem;
+        }
+
+        .pottery-table td {
+            padding: 12px;
+            border-bottom: 1px solid #dfceb1;
+            font-size: 0.875rem;
+        }
+
+        .img-fade {
+            animation: fadeIn 0.8s ease-in-out forwards;
+            opacity: 0;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        #lightbox {
+            backdrop-filter: blur(8px);
+        }
+
+        .resource-card {
+            transition: all 0.3s ease;
+        }
+
+        .resource-card:hover {
+            background-color: #ffffff;
+            border-color: #b47e44;
+            transform: scale(1.02);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+    </style>
+</head>
+
+<body class="antialiased min-h-screen pb-12 font-sans">
+
+    <!-- Header Section -->
+    <header class="bg-clay-800 text-clay-50 py-8 md:py-16 px-4 md:px-6 shadow-md relative overflow-hidden text-center">
+        <div class="absolute inset-0 opacity-10"
+            style="background-image: radial-gradient(#ceb084 1px, transparent 1px); background-size: 20px 20px;"></div>
+        <div class="max-w-6xl mx-auto relative z-10">
+            <h1 class="text-4xl md:text-6xl font-serif font-bold mb-4 tracking-wide">浮雲遊子手捏陶學習進度</h1>
+            <p class="text-xl md:text-2xl text-clay-200 font-light italic">從「器」到「氣」的蛻變</p>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 md:px-6 py-8 md:py-12 space-y-12 md:space-y-20">
+
+        <!-- Section 1: Dimensions Explorer -->
+        <section id="dimensions-section">
+            <div class="mb-10 text-center md:text-left">
+                <h2 class="text-3xl font-serif font-bold text-clay-900 border-b-4 border-clay-300 pb-2 inline-block">
+                    四大創作維度探索</h2>
+                <p class="text-clay-700 mt-4 text-lg">透過雷達圖檢視您的學習重心轉移。</p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-10">
+                <div class="lg:col-span-5 flex flex-col gap-5" id="dimension-cards-container"></div>
+                <div class="lg:col-span-7 bg-white rounded-2xl shadow-xl p-8 border border-clay-100 flex flex-col">
+                    <h3 class="text-2xl font-bold text-clay-800 mb-6 text-center" id="radar-title">創作能量比重分析</h3>
+                    <div class="chart-container-large mb-8">
+                        <canvas id="dimensionRadarChart"></canvas>
+                    </div>
+                    <div class="bg-clay-50 rounded-xl p-6 flex-grow border border-clay-200">
+                        <h4 class="font-bold text-clay-900 text-xl mb-4" id="detail-title">請點選左側維度</h4>
+                        <div id="detail-content"
+                            class="text-clay-700 space-y-4 custom-scroll max-h-48 overflow-y-auto leading-relaxed">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 2: One Square World (The Gallery) -->
+        <section id="one-square-world">
+            <div
+                class="bg-clay-100 rounded-3xl p-6 md:p-12 shadow-inner border border-clay-200 relative overflow-hidden">
+                <div class="text-center mb-10">
+                    <span
+                        class="inline-block px-4 py-1 bg-clay-800 text-clay-50 text-xs font-bold tracking-widest rounded-full mb-4">核心計畫：一方天地</span>
+                    <h2 class="text-4xl md:text-5xl font-serif font-bold text-clay-900 uppercase">整體感與空間層次的躍進</h2>
+                </div>
+
+                <!-- Gallery Tabs -->
+                <div
+                    class="flex flex-wrap justify-center gap-2 mb-8 bg-white/50 p-2 rounded-2xl border border-clay-200 max-w-4xl mx-auto shadow-sm">
+                    <button onclick="switchTab('main')" class="tab-btn active px-5 py-3 rounded-xl font-bold text-sm"
+                        data-tab="main">全景主圖</button>
+                    <button onclick="switchTab('pot')" class="tab-btn px-5 py-3 rounded-xl font-bold text-sm"
+                        data-tab="pot">茶壺與杯</button>
+                    <button onclick="switchTab('tray')" class="tab-btn px-5 py-3 rounded-xl font-bold text-sm"
+                        data-tab="tray">山水茶盤</button>
+                    <button onclick="switchTab('screen')" class="tab-btn px-5 py-3 rounded-xl font-bold text-sm"
+                        data-tab="screen">山水屏風</button>
+                    <button onclick="switchTab('tool')" class="tab-btn px-5 py-3 rounded-xl font-bold text-sm"
+                        data-tab="tool">茶則配件</button>
+                </div>
+
+                <!-- Interactive Gallery Display -->
+                <div
+                    class="gallery-container mb-12 max-w-6xl mx-auto relative flex items-center justify-center p-4 bg-clay-100">
+                    <div id="gallery-content" class="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+                    <div id="gallery-loader"
+                        class="absolute inset-0 flex items-center justify-center bg-clay-100 z-10 hidden">
+                        <div class="animate-spin rounded-full h-12 w-12 border-t-4 border-clay-500"></div>
+                    </div>
+                </div>
+
+                <!-- Dimension Reference Table -->
+                <div class="bg-white/60 p-6 md:p-10 rounded-2xl border border-clay-200">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+                        <h3 class="text-2xl font-serif font-bold text-clay-900 flex items-center gap-2">
+                            <span>📏</span> 席位尺寸與設計邏輯
+                        </h3>
+                        <span class="bg-clay-200 px-3 py-1 rounded text-xs font-bold text-clay-700">標準：1-2 人用比例基準</span>
+                    </div>
+
+                    <div class="overflow-x-auto rounded-xl border border-clay-200 bg-white">
+                        <table class="w-full pottery-table border-collapse">
+                            <thead>
+                                <tr>
+                                    <th class="w-1/4">物件名稱</th>
+                                    <th class="w-1/4">預估尺寸 (長×寬×高)</th>
+                                    <th class="w-1/2">設計與比例邏輯</th>
+                                </tr>
+                            </thead>
+                            <tbody id="dimension-table-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 3: Learning Resources (Stable High-Quality Content) -->
+        <section id="learning-resources">
+            <div class="mb-10 text-center md:text-left">
+                <h2 class="text-3xl font-serif font-bold text-clay-900 border-b-4 border-clay-300 pb-2 inline-block">
+                    陶藝進階學習資源</h2>
+                <p class="text-clay-700 mt-4 text-lg">精選來自專業陶藝頻道的手捏教學，協助您精進工法。</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- YouTube Resources -->
+                <div class="space-y-6">
+                    <h3 class="text-xl font-bold text-clay-800 flex items-center gap-2">
+                        <span>🎬</span> 推薦教學影片
+                    </h3>
+                    <div class="space-y-4">
+                        <a href="https://www.youtube.com/watch?v=E78AaoqwZVQ" target="_blank"
+                            class="resource-card block p-5 bg-clay-100 rounded-2xl border border-clay-200 group">
+                            <div class="flex items-start gap-4">
+                                <span class="text-2xl group-hover:animate-bounce">🏺</span>
+                                <div>
+                                    <h4 class="font-bold text-clay-900 underline decoration-clay-300">Advanced Pinch Pot
+                                        Making：進階手捏壺</h4>
+                                    <p class="text-sm text-clay-600 mt-1">David Hughes 示範將兩個手捏坯體結合成完整茶壺的進階技法。</p>
+                                </div>
+                            </div>
+                        </a>
+                        <a href="https://www.youtube.com/watch?v=iRdZRrd8J5w" target="_blank"
+                            class="resource-card block p-5 bg-clay-100 rounded-2xl border border-clay-200 group">
+                            <div class="flex items-start gap-4">
+                                <span class="text-2xl group-hover:animate-bounce">🍵</span>
+                                <div>
+                                    <h4 class="font-bold text-clay-900 underline decoration-clay-300">Kurinuki
+                                        剜鑿茶壺：從土塊雕出茶壺</h4>
+                                    <p class="text-sm text-clay-600 mt-1">Blank Earth Ceramics 示範日式 Kurinuki
+                                        技法，從實心土塊雕琢出茶壺的冥想式創作。</p>
+                                </div>
+                            </div>
+                        </a>
+                        <a href="https://www.youtube.com/watch?v=PDsgRpIADRc" target="_blank"
+                            class="resource-card block p-5 bg-clay-100 rounded-2xl border border-clay-200 group">
+                            <div class="flex items-start gap-4">
+                                <span class="text-2xl group-hover:animate-bounce">⛰️</span>
+                                <div>
+                                    <h4 class="font-bold text-clay-900 underline decoration-clay-300">Kurinuki
+                                        杯入門教學：初學者的剜鑿之旅</h4>
+                                    <p class="text-sm text-clay-600 mt-1">TA-DAAN 示範日式 Kurinuki 杯製作，無需轆轤即可在家嘗試的雕刻技法。</p>
+                                </div>
+                            </div>
+                        </a>
+                        <a href="https://www.youtube.com/watch?v=JzE3g9KrdOQ" target="_blank"
+                            class="resource-card block p-5 bg-clay-100 rounded-2xl border border-clay-200 group">
+                            <div class="flex items-start gap-4">
+                                <span class="text-2xl group-hover:animate-bounce">☕</span>
+                                <div>
+                                    <h4 class="font-bold text-clay-900 underline decoration-clay-300">手捏陶杯：免轆轤居家陶藝</h4>
+                                    <p class="text-sm text-clay-600 mt-1">Lolita Olympia 示範不用轆轤的手捏杯完整流程，掌握壁厚控制的基礎。</p>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Web Resources -->
+                <div class="space-y-6">
+                    <h3 class="text-xl font-bold text-clay-800 flex items-center gap-2">
+                        <span>🌐</span> 深度知識與靈感
+                    </h3>
+                    <div class="space-y-4">
+                        <a href="https://ceramic.school" target="_blank"
+                            class="resource-card block p-5 bg-clay-100 rounded-2xl border border-clay-200">
+                            <div class="flex items-start gap-4">
+                                <span class="text-2xl">🎓</span>
+                                <div>
+                                    <h4 class="font-bold text-clay-900">The Ceramic School</h4>
+                                    <p class="text-sm text-clay-600 mt-1">專業線上陶藝教學平台，含手捏工作坊課程與社群，可終身回看。</p>
+                                </div>
+                            </div>
+                        </a>
+                        <a href="https://ceramicartsnetwork.org" target="_blank"
+                            class="resource-card block p-5 bg-clay-100 rounded-2xl border border-clay-200">
+                            <div class="flex items-start gap-4">
+                                <span class="text-2xl">📚</span>
+                                <div>
+                                    <h4 class="font-bold text-clay-900">Ceramic Arts Network</h4>
+                                    <p class="text-sm text-clay-600 mt-1">全球最具權威的陶藝教育平台，提供手捏、釉料、窯燒等全方位教學文章與影片。</p>
+                                </div>
+                            </div>
+                        </a>
+                        <a href="https://www.youtube.com/@BlankEarthCeramics/videos" target="_blank"
+                            class="resource-card block p-5 bg-clay-100 rounded-2xl border border-clay-200">
+                            <div class="flex items-start gap-4">
+                                <span class="text-2xl">🎨</span>
+                                <div>
+                                    <h4 class="font-bold text-clay-900">Blank Earth Ceramics 頻道</h4>
+                                    <p class="text-sm text-clay-600 mt-1">專精 Kurinuki 日式雕陶的頻道，收錄茶壺、茶碗、蓋碗等完整教學系列。</p>
+                                </div>
+                            </div>
+                        </a>
+                        <a href="https://www.youtube.com/results?search_query=%E6%89%8B%E6%8D%8F%E9%99%B6+%E8%8C%B6%E5%A3%BA+%E6%95%99%E5%AD%B8"
+                            target="_blank"
+                            class="resource-card block p-5 bg-clay-100 rounded-2xl border border-clay-200">
+                            <div class="flex items-start gap-4">
+                                <span class="text-2xl">🔍</span>
+                                <div>
+                                    <h4 class="font-bold text-clay-900">YouTube 手捏陶茶壺教學合集</h4>
+                                    <p class="text-sm text-clay-600 mt-1">中文手捏陶茶壺教學搜尋，找到更多台灣與華語地區的手捏壺示範。</p>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 4: Action Plan -->
+        <section id="action-plan" class="max-w-4xl mx-auto">
+            <h2 class="text-3xl font-serif font-bold text-clay-900 mb-8 flex items-center gap-3">
+                <span>🗓️</span> 開學首日啟動方案
+            </h2>
+            <div class="bg-white rounded-3xl shadow-xl p-8 border border-clay-200">
+                <div class="space-y-4" id="checklist-container"></div>
+                <div class="mt-8 p-6 bg-clay-50 border-l-4 border-clay-500 rounded-r-lg">
+                    <p class="font-bold text-clay-900 italic">「陶藝的迷人之處在於捏製過程中，看見當下的自己。」</p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Lightbox Modal -->
+    <div id="lightbox"
+        class="fixed inset-0 bg-black/95 z-[100] hidden flex-col items-center justify-center p-2 md:p-4 cursor-zoom-out"
+        onclick="closeLightbox()">
+        <button
+            class="absolute top-3 right-3 md:top-6 md:right-6 text-white text-4xl md:text-5xl hover:text-clay-400 transition z-10"
+            onclick="closeLightbox()">&times;</button>
+        <div class="relative max-w-6xl w-full h-full flex flex-col items-center justify-center"
+            onclick="event.stopPropagation()">
+            <img id="lightbox-img" src="" alt=""
+                class="max-w-full max-h-[80vh] md:max-h-[85vh] object-contain shadow-2xl rounded-lg">
+            <p id="lightbox-label"
+                class="text-clay-100 mt-4 md:mt-6 text-base md:text-xl font-serif font-medium tracking-wide text-center px-4">
+            </p>
+        </div>
+    </div>
+
+    <footer class="bg-clay-900 text-clay-400 py-12 text-center mt-20">
+        <p class="text-sm tracking-widest opacity-60 font-serif italic text-clay-100">願每一泥土的溫度，都能溫暖您的品茗時光。</p>
+    </footer>
+
+    <script>
+        // --- Gallery Data (Using stable Google Drive direct link format) ---
+        const galleryData = {
+            main: [{ id: 'm1', src: 'https://lh3.googleusercontent.com/d/1nyPWULlzNO-dHjXjJ6jutZWdaviv13w3', label: '席位全景：一方天地的宏觀視野' }],
+            pot: [
+                { id: 'p1', src: 'https://lh3.googleusercontent.com/d/1Qh6F0CN9E9jlwiuhkR70IH309anpQDX2', label: '手捏茶杯細節：溫潤指感與比例平衡' },
+                { id: 'p2', src: 'https://lh3.googleusercontent.com/d/1HUBp5iCQD38xKcvrLfpU-gVIt5hYIsI3', label: '壺杯合鳴 (一)' },
+                { id: 'p3', src: 'https://lh3.googleusercontent.com/d/186q10pEMMpaq6w_dF0chsWmYsOPb9ws7', label: '壺杯合鳴 (二)' }
+            ],
+            tray: [{ id: 't1', src: 'https://lh3.googleusercontent.com/d/1WiE25HtzvRaqURG25ZCO50Bn7Bqo2rff', label: '山水茶盤：模擬溪流與岩石的律動' }],
+            screen: [
+                { id: 's1', src: 'https://lh3.googleusercontent.com/d/1_lxrrzdVg03v0amk-INMZapzkpqcDvdc', label: '山水屏風：營造茶席意象景深' },
+                { id: 's2', src: 'https://lh3.googleusercontent.com/d/16iyIhah5DPrPKMgwGmHwTcGw03aDo6jq', label: '屏風細部：手工刻劃的山石肌理' }
+            ],
+            tool: [{ id: 'tl1', src: 'https://lh3.googleusercontent.com/d/1fueMFL2fBg9IOBQ5ZVMpXb6jcH5Sg1gP', label: '茶則與配件：席位中的精緻點綴' }]
+        };
+
+        const tableData = [
+            { name: '景觀茶壺', size: '約 14 × 10 × 9 cm', detail: '高度略低於後方屏風，確保視覺重心穩固。' },
+            { name: '流動壺承', size: '約 16 × 14 × 4 cm', detail: '寬度需穩托茶壺，線條與茶盤紋路銜接。' },
+            { name: '木石茶則', size: '長約 15 cm', detail: '模擬枯木長條狀，方便取茶且長度適中。' },
+            { name: '山水屏風', size: '約 20 × 12 cm', detail: '作為背景，是茶席視覺的最高點與邊界。' },
+            { name: '手捏茶杯', size: '直徑約 6 cm', detail: '小巧杯身，可靈活配置於地景中的「溪岸」。' }
+        ];
+
+        const dimensionsData = [
+            { id: 'dim1', title: '質感與肌理', radarValues: [95, 40, 50, 40], content: '<p>挑戰目標：放下平整，追求原始土性。保留按壓痕跡，實驗化妝土剝落感。</p>' },
+            { id: 'dim2', title: '空間營造', radarValues: [50, 95, 40, 30], content: '<p>本學期核心：一方天地。將單件作品擴展為成套地景，創造空間的故事性。</p>' },
+            { id: 'dim3', title: '造型突破', radarValues: [60, 30, 95, 40], content: '<p>探索方向：測試土的物理限制。挑戰非對稱結構與極薄泥片的平衡。</p>' },
+            { id: 'dim4', title: '在地情感', radarValues: [70, 50, 60, 90], content: '<p>靈感源頭：將岡山的回憶（如樹皮、紅磚意象）轉化為作品的獨特紋路。</p>' }
+        ];
+
+        let radarChart = null;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initUI();
+            initCharts();
+            switchTab('main');
+            selectDimension('dim2');
+        });
+
+        // --- Gallery Controls ---
+        window.switchTab = function (category) {
+            const container = document.getElementById('gallery-content');
+            const loader = document.getElementById('gallery-loader');
+            const tabs = document.querySelectorAll('.tab-btn');
+
+            tabs.forEach(t => t.classList.toggle('active', t.dataset.tab === category));
+            loader.classList.remove('hidden');
+            container.innerHTML = '';
+
+            const images = galleryData[category];
+            container.className = `w-full grid gap-6 ${images.length > 2 ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3' : images.length === 2 ? 'grid-cols-1 md:grid-cols-2' : 'grid-cols-1 max-w-4xl mx-auto'}`;
+
+            images.forEach((img, index) => {
+                const wrapper = document.createElement('div');
+                const isMain = category === 'main';
+                wrapper.className = `relative group rounded-xl overflow-hidden bg-clay-200/30 shadow-md border border-clay-200 ${isMain ? '' : 'aspect-[4/3]'} img-fade cursor-zoom-in`;
+                wrapper.style.animationDelay = `${index * 100}ms`;
+                wrapper.onclick = () => openLightbox(img.src, img.label);
+
+                wrapper.innerHTML = `
+                    <img src="${img.src}" alt="${img.label}" class="w-full ${isMain ? 'h-auto' : 'h-full'} object-contain" onload="this.parentElement.style.opacity=1" onerror="handleImgError(this)">
+                    <div class="absolute bottom-0 inset-x-0 bg-clay-900/80 text-clay-50 p-3 text-xs md:text-sm transform translate-y-full group-hover:translate-y-0 transition-duration-300">
+                        ${img.label}
+                    </div>
+                `;
+                container.appendChild(wrapper);
+            });
+            setTimeout(() => loader.classList.add('hidden'), 400);
+        };
+
+        function handleImgError(img) {
+            img.parentElement.innerHTML = `<div class="w-full h-full flex flex-col items-center justify-center p-6 text-clay-400"><span class="text-3xl mb-2">🖼️</span><p class="text-xs">圖片載入受限</p></div>`;
+        }
+
+        // --- Lightbox ---
+        window.openLightbox = function (src, label) {
+            document.getElementById('lightbox-img').src = src;
+            document.getElementById('lightbox-label').innerText = label;
+            document.getElementById('lightbox').classList.replace('hidden', 'flex');
+            document.body.style.overflow = 'hidden';
+        };
+        window.closeLightbox = function () {
+            document.getElementById('lightbox').classList.replace('flex', 'hidden');
+            document.body.style.overflow = 'auto';
+        };
+
+        // --- UI Init ---
+        function initUI() {
+            // Table
+            const tbody = document.getElementById('dimension-table-body');
+            tableData.forEach(item => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `<td class="font-bold text-clay-800">${item.name}</td><td>${item.size}</td><td class="text-clay-600">${item.detail}</td>`;
+                tbody.appendChild(tr);
+            });
+
+            // Dimension Cards
+            const dContainer = document.getElementById('dimension-cards-container');
+            dimensionsData.forEach(dim => {
+                const card = document.createElement('div');
+                card.className = 'dimension-card bg-clay-50 rounded-xl p-5 border border-clay-200 shadow-sm';
+                card.dataset.id = dim.id;
+                card.onclick = () => selectDimension(dim.id);
+                card.innerHTML = `<h3 class="font-bold text-clay-900 text-lg">${dim.title}</h3>`;
+                dContainer.appendChild(card);
+            });
+
+            // Checklist
+            const checklist = [
+                '帶著不滿意的舊作上課，請老師協助尋找改進點。',
+                '規劃一方天地的空間佈置（畫草圖）。',
+                '練習屏風薄片的防翹曲捏製技術。',
+                '捏一個手握杯，感受指尖的施力回饋。'
+            ];
+            const cContainer = document.getElementById('checklist-container');
+            checklist.forEach(task => {
+                const label = document.createElement('label');
+                label.className = 'flex items-center gap-4 p-4 bg-white rounded-xl border border-clay-100 cursor-pointer hover:bg-clay-50 transition shadow-sm';
+                label.innerHTML = `<input type="checkbox" class="w-6 h-6 rounded-full text-clay-600 border-clay-300 focus:ring-clay-500"><span class="text-clay-800 font-medium">${task}</span>`;
+                cContainer.appendChild(label);
+            });
+        }
+
+        function selectDimension(id) {
+            const dim = dimensionsData.find(d => d.id === id);
+            document.querySelectorAll('.dimension-card').forEach(c => c.classList.toggle('active', c.dataset.id === id));
+            document.getElementById('detail-title').innerText = dim.title;
+            document.getElementById('detail-content').innerHTML = dim.content;
+            if (radarChart) { radarChart.data.datasets[0].data = dim.radarValues; radarChart.update(); }
+        }
+
+        function initCharts() {
+            Chart.defaults.font.family = '"Noto Sans TC", sans-serif';
+            radarChart = new Chart(document.getElementById('dimensionRadarChart'), {
+                type: 'radar',
+                data: {
+                    labels: ['質感/肌理', '空間/營造', '造型/突破', '在地/敘事'],
+                    datasets: [{ label: '能量分佈', data: [50, 50, 50, 50], backgroundColor: 'rgba(180, 126, 68, 0.2)', borderColor: '#b47e44', borderWidth: 3 }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, scales: { r: { ticks: { display: false, max: 100 } } }, plugins: { legend: { display: false } } }
+            });
+        }
+    </script>
+</body>
+
+</html>
